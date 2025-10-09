@@ -10,8 +10,9 @@ import java.sql.*;
 
 public class TablaUsuario extends javax.swing.JFrame {
 
-    private UserInfo usuario; // guardamos los datos del login
+  private final UserInfo usuario;
 
+    // -------- CONSTRUCTOR PRINCIPAL ----------
     public TablaUsuario(UserInfo usuario) {
         this.usuario = usuario;
         initComponents();
@@ -20,29 +21,44 @@ public class TablaUsuario extends javax.swing.JFrame {
         cargarIncidencias();
     }
 
-    // Evitar uso sin usuario
-    private TablaUsuario() { throw new UnsupportedOperationException("Not supported yet."); }
+    // Evita uso sin login
+    private TablaUsuario() {
+        throw new UnsupportedOperationException("No se puede usar sin login.");
+    }
 
-    // --- público para que Registro pueda refrescar al volver
+    // -------- REFRESCAR DATOS ----------
     public void refrescar() {
         cargarDatosUsuario();
         cargarIncidencias();
     }
 
+    // -------- CARGAR DATOS DEL USUARIO ----------
     private void cargarDatosUsuario() {
         jT_Nombre.setText(usuario.nombre);
         jT_Tipo_de_usuario.setText(usuario.rol);
         jT_Departamento.setText(String.valueOf(usuario.idDepartamento));
     }
 
+    // -------- CARGAR INCIDENCIAS ----------
     private void cargarIncidencias() {
         DefaultTableModel model = new DefaultTableModel(
-                new String[]{"Título", "Registro", "Departamento", "Encargado", "Tiempo", "Estatus", "Prioridad"}, 0
-        );
+                new String[]{"ID", "Título", "Registro", "Departamento", "Encargado", "Tiempo", "Estatus", "Prioridad"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // todas las celdas no editables
+            }
+        };
         jTable_Usuario.setModel(model);
+
+        // Ocultar columna ID
+        jTable_Usuario.getColumnModel().getColumn(0).setMinWidth(0);
+        jTable_Usuario.getColumnModel().getColumn(0).setMaxWidth(0);
+        jTable_Usuario.getColumnModel().getColumn(0).setWidth(0);
 
         String sql = """
             SELECT 
+                t.id,
                 t.titulo,
                 t.registrado AS fecha_registro,
                 d.nombre AS departamento,
@@ -65,6 +81,7 @@ public class TablaUsuario extends javax.swing.JFrame {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     model.addRow(new Object[]{
+                            rs.getInt("id"),
                             rs.getString("titulo"),
                             rs.getTimestamp("fecha_registro"),
                             rs.getString("departamento"),
@@ -82,6 +99,30 @@ public class TablaUsuario extends javax.swing.JFrame {
         }
     }
 
+    // -------- ABRIR DETALLE DE INCIDENCIA ----------
+    private void abrirDetalle() {
+        int filaSeleccionada = jTable_Usuario.getSelectedRow();
+
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "⚠️ Selecciona un ticket para ver su detalle.");
+            return;
+        }
+
+        // Obtener el ID del ticket seleccionado
+        int idTicket = Integer.parseInt(jTable_Usuario.getValueAt(filaSeleccionada, 0).toString());
+
+        // Abrir ventana DetalleIncidencia
+        DetalleIncidencia detalle = new DetalleIncidencia(usuario.idUsuario, idTicket, this);
+        detalle.setVisible(true);
+        this.setVisible(false);
+    }
+
+    // -------- ABRIR REGISTRO ----------
+    private void abrirRegistro() {
+        Registro reg = new Registro(usuario.idUsuario, this);
+        reg.setVisible(true);
+        this.setVisible(false);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -99,7 +140,7 @@ public class TablaUsuario extends javax.swing.JFrame {
         jT_Departamento = new javax.swing.JTextField();
         jT_Tipo_de_usuario = new javax.swing.JTextField();
         jB_Registro = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        jB_SeguimientoActio = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
@@ -141,14 +182,14 @@ public class TablaUsuario extends javax.swing.JFrame {
             }
         });
 
-        jButton2.setBackground(new java.awt.Color(51, 51, 51));
-        jButton2.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jButton2.setForeground(new java.awt.Color(255, 255, 255));
-        jButton2.setText("Seguimiento");
-        jButton2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        jB_SeguimientoActio.setBackground(new java.awt.Color(51, 51, 51));
+        jB_SeguimientoActio.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jB_SeguimientoActio.setForeground(new java.awt.Color(255, 255, 255));
+        jB_SeguimientoActio.setText("Seguimiento");
+        jB_SeguimientoActio.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jB_SeguimientoActio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                jB_SeguimientoActioActionPerformed(evt);
             }
         });
 
@@ -197,7 +238,7 @@ public class TablaUsuario extends javax.swing.JFrame {
                             .addComponent(jT_Tipo_de_usuario, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 132, Short.MAX_VALUE)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jB_SeguimientoActio, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(46, 46, 46)
                         .addComponent(jB_Registro, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(14, 14, 14)))
@@ -213,7 +254,7 @@ public class TablaUsuario extends javax.swing.JFrame {
                         .addGap(58, 58, 58)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jB_Registro, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jB_SeguimientoActio, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(30, 30, 30)
                         .addComponent(jLabel7)
@@ -236,9 +277,10 @@ public class TablaUsuario extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void jB_SeguimientoActioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_SeguimientoActioActionPerformed
+ abrirDetalle();
+
+    }//GEN-LAST:event_jB_SeguimientoActioActionPerformed
 
     private void jB_RegistroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_RegistroActionPerformed
  Registro reg = new Registro(usuario.idUsuario, this);
@@ -287,7 +329,7 @@ public class TablaUsuario extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jB_Registro;
-    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jB_SeguimientoActio;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;

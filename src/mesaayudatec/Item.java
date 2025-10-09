@@ -1,8 +1,9 @@
 package mesaayudatec;
 
 public class Item {
-    private final int id;
-    private final String nombre;
+
+    private int id;
+    private String nombre;
 
     public Item(int id, String nombre) {
         this.id = id;
@@ -19,6 +20,10 @@ public class Item {
 
     @Override
     public String toString() {
-        return nombre; // lo que se muestra en el JComboBox
+        return nombre;
+    }
+
+    Object getDescripcion() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

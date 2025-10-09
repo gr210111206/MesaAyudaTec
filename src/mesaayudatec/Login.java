@@ -150,7 +150,7 @@ public class Login extends javax.swing.JFrame {
     }//GEN-LAST:event_jTex_UsuarioActionPerformed
 
     private void JB_AccederActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JB_AccederActionPerformed
-       String usuario = jTex_Usuario.getText().trim();
+      String usuario = jTex_Usuario.getText().trim();
         String password = jTex_Password.getText().trim();
 
         if (usuario.isEmpty() || password.isEmpty()) {
@@ -166,14 +166,14 @@ public class Login extends javax.swing.JFrame {
 
             if (ui != null) {
                 SwingUtilities.invokeLater(() -> {
-                    // Según rol abrir ventana
+                    // 🔹 Según el rol, abrimos la ventana correspondiente
                     if (ui.rol.equals("Administrador") || ui.rol.equals("Agente")) {
                         new TablaUsuario(ui).setVisible(true); 
                     } else if (ui.rol.equals("Solicitante")) {
-                        new Registro(ui.idUsuario).setVisible(true); 
+                        new UsuarioSolicitante(ui.idUsuario).setVisible(true); 
                     }
                 });
-                dispose(); // cerrar Login
+                dispose(); // cerrar la ventana de login
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Usuario o contraseña inválidos o usuario inhabilitado.",

@@ -21,6 +21,25 @@ public final class ComboHelper {
         cargar(combo, "SELECT id, nombre FROM tb_prioridades ORDER BY valor");
     }
 
+    // ✅ NUEVO MÉTODO: CARGAR USUARIOS (para el combo "Asignado")
+    public static void cargarUsuarios(JComboBox combo) {
+        combo.removeAllItems();
+        String sql = "SELECT idusuario, nombre FROM tb_usuario ORDER BY nombre";
+        try (Connection con = new MySqlConexion().getConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                combo.addItem(new Item(rs.getInt("idusuario"), rs.getString("nombre")));
+            }
+
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(combo,
+                    "Error cargando usuarios: " + e.getMessage(),
+                    "Error BD", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     // ---------- OBTENER ID ----------
     public static int getIdSeleccionado(JComboBox combo) {
         Object o = combo.getSelectedItem();
